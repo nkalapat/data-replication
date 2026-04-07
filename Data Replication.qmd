@@ -1,0 +1,85 @@
+---
+title: "Data Replication"
+format: html
+---
+
+library(readxl)
+library(dplyr)
+library(tidyverse)
+library(ggplot2)
+library(ggpubr)
+
+sheets <- excel_sheets("/Users/nikhilakalapatapu/Downloads/Raw Data for Data Replication Project.xlsx")
+sheets
+
+#Describe the columns 
+NOR_data <- read_excel("/Users/nikhilakalapatapu/Downloads/Raw Data for Data Replication Project.xlsx", sheet = 11)
+NOR_data
+
+NOR_data %>%
+  group_by(Group) %>%
+  summarise(
+    mean_novel = mean(New, na.rm = TRUE),
+    mean_familiar = mean(Old, na.rm = TRUE),
+    sd_novel = sd(New, na.rm = TRUE),
+    sd_familiar = sd(Old, na.rm = TRUE), 
+    mean_ratio = mean(Ratio, na.rm = TRUE)
+  )
+
+NOR_data <- NOR_data %>%
+  mutate(Ratio = as.numeric(Ratio))
+  
+ggplot(NOR_data, aes(x = Group, y = Ratio, fill = Group)) +
+  stat_summary(fun = mean, geom = "bar", width = 0.5) +
+  geom_jitter(width = 0.15, size = 2.5, alpha = 0.8) + 
+  stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.2) +
+  labs(title = "Average Percentage of Time Spent Exploring the Novel Object", x = "Experimental       Condition", y = "Average Percentage") + 
+  theme_minimal()
+
+#T-test to determine whether or not the mean percentage of time spent exploring the novel object is significantly different between control and EtOH-treated mice. 
+t.test(Ratio ~ Group, data = NOR_data)
+#Since the p-value is 0.000089, the mean percentage of time spent exploring the novel object is significantly different between control and EtOH-treated mice.
+
+#WB
+WB_data <- read_excel("/Users/nikhilakalapatapu/Downloads/Raw Data for Data Replication Project.xlsx", sheet = 5)
+WB_data
+
+WB_data <- WB_data %>%
+ mutate(
+  ZO1_GAPDH = `ZO-1`/GAPDH,
+  Occludin_GAPDH = Occludin/GAPDH,
+  Claudin5_GAPDH = `Claudin-5`/GAPDH
+ )
+WB_data
+
+WB_data %>%
+  filter(Region == "PFC") %>%
+  group_by(Group) %>%
+  summarise(
+  n = n(),
+  mean_ZO1_GAPDH = mean(ZO1_GAPDH),
+  mean_Occludin_GAPDH = mean(Occludin_GAPDH),
+  mean_Claudin5_GAPDH = mean(Claudin5_GAPDH)
+  )
+
+WB_data %>%
+  filter(Region == "Hippocampus") %>%
+  group_by(Group) %>%
+  summarise(
+  n = n(),
+  mean_ZO1_GAPDH = mean(ZO1_GAPDH),
+  mean_Occludin_GAPDH = mean(Occludin_GAPDH),
+  mean_Claudin5_GAPDH = mean(Claudin5_GAPDH)
+  )
+  
+
+model_ZO1 <- aov(ZO1_GAPDH ~ Group * Region, data = WB_data)
+summary(model_ZO1)
+model_Occludin <- aov(Occludin_GAPDH ~ Group * Region, data = WB_data)
+summary(model_Occludin)
+model_Claudin5 <- aov(Claudin5_GAPDH ~ Group * Region, data = WB_data)
+summary(model_Claudin5)
+
+
+
+
