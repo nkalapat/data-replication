@@ -23,10 +23,13 @@ sheets <- excel_sheets("data/Raw Data for Data Replication Project.xlsx")
 sheets
 ```
 
+```{r}
 #After reorganizing some of the novel object recognition test data in a new excel sheet, I loaded it in using the read_excel() function. The novel object recognition (NOR) test is used to assess recognition memory and relies on the natural tendency of mice to explore a novel object over a familiar one. The time spent exploring a previously explored object (Old column) and time spent exploring a new object (New column) are recorded for each mouse. The mice are divided into two different groups, control and EtOH-treated. The percentage of time spent exploring the novel object, calculated as (time spent exploring novel object/total exploration time)*100, is recorded in the Ratio column. 
 NOR_data <- read_excel("data/Raw Data for Data Replication Project.xlsx", sheet = 11)
 NOR_data
+```
 
+```{r}
 #I used the group_by() function to analyze the data by experimental group (Control vs. EtOH). I calculated the average time spent exploring the new object, average time exploring the old object, standard deviation in exploration time of the new object, standard deviation in exploration time of the old object, and average percentage of time spent exploring the new object for each experimental group. The mean percentage values line up with what was calculated by the authors.
 NOR_data %>%
   group_by(Group) %>%
@@ -37,7 +40,9 @@ NOR_data %>%
     sd_familiar = sd(Old, na.rm = TRUE), 
     mean_ratio = mean(Ratio, na.rm = TRUE)
   )
+```
 
+```{r}
 #I made a simple bar graph, which is what the authors of the paper did, to visualize the average percentage of time spent exploring the novel object by experimental group. I used the stat_summary function to graph the average percentage of time spent exploring the novel object, and to add error bars. I also added in the individual data points with geom_jitter(), which is what the authors did as well. 
 NOR_data <- NOR_data %>%
   mutate(Ratio = as.numeric(Ratio))
@@ -48,18 +53,26 @@ ggplot(NOR_data, aes(x = Group, y = Ratio, fill = Group)) +
   stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.2) +
   labs(title = "Average Percentage of Time Spent Exploring the Novel Object", x = "Experimental       Group", y = "Average Percentage") + 
   theme_minimal()
+```
 
+```{r}
 #Here is the figure from the original paper. 
-list.files("images")
+knitr::include_graphics("images/NOR Bar Graph.jpeg")
+```
 
+```{r}
 #I did a T-test to determine whether or not the mean percentage of time spent exploring the novel object is significantly different between control and EtOH-treated mice. 
 t.test(Ratio ~ Group, data = NOR_data)
-#Since the p-value is 0.000089, the mean percentage of time spent exploring the novel object is significantly different between control and EtOH-treated mice. The authors calculated the same p-value. 
+#Since the p-value is 0.000089, the mean percentage of time spent exploring the novel object is significantly different between control and EtOH-treated mice. The authors calculated the same p-value.
+```
 
+```{r}
 #After reorganizing some of the western blot data in a new excel sheet, I loaded it in. This particular western blot (WB) was looking at protein expression of three different tight junction proteins, ZO-1, occludin, and claudin-5, in two different brain regions. GAPDH is frequently used as a housekeeping protein to normalize the expression levels of other proteins. 
 WB_data <- read_excel("data/Raw Data for Data Replication Project.xlsx", sheet = 5)
 WB_data
+```
 
+```{r}
 #I used the mutate function and added three additional columns to the re-organized dataset. 
 WB_data <- WB_data %>%
  mutate(
@@ -68,7 +81,9 @@ WB_data <- WB_data %>%
   Claudin5_GAPDH = `Claudin-5`/GAPDH
  )
 WB_data
+```
 
+```{r}
 #I used the filter() function to look at one brain region at a time (PFC vs. hippocampus) and the group_by() function to analyze the data by experimental group (control vs. EtOH-treated). I then calculated the average expression level of each protein of interest relative to GAPDH (which I calculated for each mouse in the previous step). These values align with what the authors calculated.
 WB_data %>%
   filter(Region == "PFC") %>%
@@ -89,7 +104,9 @@ WB_data %>%
   mean_Occludin_GAPDH = mean(Occludin_GAPDH),
   mean_Claudin5_GAPDH = mean(Claudin5_GAPDH)
   )
+```
 
+```{r}
 #The authors appeared to have done a 1-way ANOVA on this data, looking at the effect of experimental group on protein expression levels. I got the same p-values as the authors. I found it interesting that the authors did not do a 2-way ANOVA on this data in order to look at the effect of brain region on protein expression levels and a potential experimental group by brain region interaction. 
 model_ZO1_PFC <- aov(ZO1_GAPDH ~ Group, data = WB_data %>% 
   filter(Region == "PFC"))
@@ -110,4 +127,5 @@ model_Occludin_Hippocampus <- aov(Occludin_GAPDH ~ Group, data = WB_data %>%
 model_Claudin5_Hippocampus <- aov(Claudin5_GAPDH ~ Group, data = WB_data %>% 
   filter(Region == "Hippocampus"))
   summary(model_Claudin5_Hippocampus)
+```
 
