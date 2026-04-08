@@ -2,24 +2,29 @@
 title: "Data Replication"
 format: html
 ---
-
+```{r}
 library(readxl)
 library(dplyr)
 library(tidyverse)
 library(ggplot2)
 library(ggpubr)
 library(knitr)
+```
 
+```{r}
 #I read in the raw data file. 
-raw_data <- read_excel("/Users/nikhilakalapatapu/Data Replication Project/data/Raw Data for Data Replication Project.xlsx")
+raw_data <- read_excel("data/Raw Data for Data Replication Project.xlsx")
 head(raw_data)
+```
 
+```{r}
 #I used the excel_sheets() function to see the names of all of the sheets in the excel file.
-sheets <- excel_sheets("/Users/nikhilakalapatapu/Data Replication Project/data/Raw Data for Data Replication Project.xlsx")
+sheets <- excel_sheets("data/Raw Data for Data Replication Project.xlsx")
 sheets
+```
 
 #After reorganizing some of the novel object recognition test data in a new excel sheet, I loaded it in using the read_excel() function. The novel object recognition (NOR) test is used to assess recognition memory and relies on the natural tendency of mice to explore a novel object over a familiar one. The time spent exploring a previously explored object (Old column) and time spent exploring a new object (New column) are recorded for each mouse. The mice are divided into two different groups, control and EtOH-treated. The percentage of time spent exploring the novel object, calculated as (time spent exploring novel object/total exploration time)*100, is recorded in the Ratio column. 
-NOR_data <- read_excel("/Users/nikhilakalapatapu/Data Replication Project/data/Raw Data for Data Replication Project.xlsx", sheet = 11)
+NOR_data <- read_excel("data/Raw Data for Data Replication Project.xlsx", sheet = 11)
 NOR_data
 
 #I used the group_by() function to analyze the data by experimental group (Control vs. EtOH). I calculated the average time spent exploring the new object, average time exploring the old object, standard deviation in exploration time of the new object, standard deviation in exploration time of the old object, and average percentage of time spent exploring the new object for each experimental group. The mean percentage values line up with what was calculated by the authors.
@@ -52,7 +57,7 @@ t.test(Ratio ~ Group, data = NOR_data)
 #Since the p-value is 0.000089, the mean percentage of time spent exploring the novel object is significantly different between control and EtOH-treated mice. The authors calculated the same p-value. 
 
 #After reorganizing some of the western blot data in a new excel sheet, I loaded it in. This particular western blot (WB) was looking at protein expression of three different tight junction proteins, ZO-1, occludin, and claudin-5, in two different brain regions. GAPDH is frequently used as a housekeeping protein to normalize the expression levels of other proteins. 
-WB_data <- read_excel("/Users/nikhilakalapatapu/Data Replication Project/data/Raw Data for Data Replication Project.xlsx", sheet = 5)
+WB_data <- read_excel("data/Raw Data for Data Replication Project.xlsx", sheet = 5)
 WB_data
 
 #I used the mutate function and added three additional columns to the re-organized dataset. 
