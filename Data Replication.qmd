@@ -46,7 +46,6 @@ ggplot(NOR_data, aes(x = Group, y = Ratio, fill = Group)) +
 
 #Here is the figure from the original paper. 
 list.files("images")
-knitr::include_graphics("NOR Bar graph.jpeg")
 
 #I did a T-test to determine whether or not the mean percentage of time spent exploring the novel object is significantly different between control and EtOH-treated mice. 
 t.test(Ratio ~ Group, data = NOR_data)
