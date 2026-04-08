@@ -56,7 +56,7 @@ ggplot(NOR_data, aes(x = Group, y = Ratio, fill = Group)) +
 ```
 
 ```{r}
-#Here is the figure from the original paper. 
+#Here is the figure from the original paper. I replicated F. 
 knitr::include_graphics("images/NOR Bar Graph.jpeg")
 ```
 
