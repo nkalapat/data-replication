@@ -20,6 +20,41 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
@@ -64,21 +99,320 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<p>library(readxl) library(dplyr) library(tidyverse) library(ggplot2) library(ggpubr) library(knitr)</p>
-<p>#I read in the raw data file. raw_data &lt;- read_excel(“/Users/nikhilakalapatapu/Data Replication Project/data/Raw Data for Data Replication Project.xlsx”) head(raw_data)</p>
-<p>#I used the excel_sheets() function to see the names of all of the sheets in the excel file. sheets &lt;- excel_sheets(“/Users/nikhilakalapatapu/Data Replication Project/data/Raw Data for Data Replication Project.xlsx”) sheets</p>
-<p>#After reorganizing some of the novel object recognition test data in a new excel sheet, I loaded it in using the read_excel() function. The novel object recognition (NOR) test is used to assess recognition memory and relies on the natural tendency of mice to explore a novel object over a familiar one. The time spent exploring a previously explored object (Old column) and time spent exploring a new object (New column) are recorded for each mouse. The mice are divided into two different groups, control and EtOH-treated. The percentage of time spent exploring the novel object, calculated as (time spent exploring novel object/total exploration time)*100, is recorded in the Ratio column. NOR_data &lt;- read_excel(“/Users/nikhilakalapatapu/Data Replication Project/data/Raw Data for Data Replication Project.xlsx”, sheet = 11) NOR_data</p>
-<p>#I used the group_by() function to analyze the data by experimental group (Control vs.&nbsp;EtOH). I calculated the average time spent exploring the new object, average time exploring the old object, standard deviation in exploration time of the new object, standard deviation in exploration time of the old object, and average percentage of time spent exploring the new object for each experimental group. The mean percentage values line up with what was calculated by the authors. NOR_data %&gt;% group_by(Group) %&gt;% summarise( mean_novel = mean(New, na.rm = TRUE), mean_familiar = mean(Old, na.rm = TRUE), sd_novel = sd(New, na.rm = TRUE), sd_familiar = sd(Old, na.rm = TRUE), mean_ratio = mean(Ratio, na.rm = TRUE) )</p>
-<p>#I made a simple bar graph, which is what the authors of the paper did, to visualize the average percentage of time spent exploring the novel object by experimental group. I used the stat_summary function to graph the average percentage of time spent exploring the novel object, and to add error bars. I also added in the individual data points with geom_jitter(), which is what the authors did as well. NOR_data &lt;- NOR_data %&gt;% mutate(Ratio = as.numeric(Ratio))</p>
-<p>ggplot(NOR_data, aes(x = Group, y = Ratio, fill = Group)) + stat_summary(fun = mean, geom = “bar”, width = 0.5) + geom_jitter(width = 0.15, size = 2.5, alpha = 0.8) + stat_summary(fun.data = mean_se, geom = “errorbar”, width = 0.2) + labs(title = “Average Percentage of Time Spent Exploring the Novel Object”, x = “Experimental Group”, y = “Average Percentage”) + theme_minimal()</p>
-<p>#Here is the figure from the original paper. list.files(“images”)</p>
-<p>#I did a T-test to determine whether or not the mean percentage of time spent exploring the novel object is significantly different between control and EtOH-treated mice. t.test(Ratio ~ Group, data = NOR_data) #Since the p-value is 0.000089, the mean percentage of time spent exploring the novel object is significantly different between control and EtOH-treated mice. The authors calculated the same p-value.</p>
-<p>#After reorganizing some of the western blot data in a new excel sheet, I loaded it in. This particular western blot (WB) was looking at protein expression of three different tight junction proteins, ZO-1, occludin, and claudin-5, in two different brain regions. GAPDH is frequently used as a housekeeping protein to normalize the expression levels of other proteins. WB_data &lt;- read_excel(“/Users/nikhilakalapatapu/Data Replication Project/data/Raw Data for Data Replication Project.xlsx”, sheet = 5) WB_data</p>
-<p>#I used the mutate function and added three additional columns to the re-organized dataset. WB_data &lt;- WB_data %&gt;% mutate( ZO1_GAPDH = <code>ZO-1</code>/GAPDH, Occludin_GAPDH = Occludin/GAPDH, Claudin5_GAPDH = <code>Claudin-5</code>/GAPDH ) WB_data</p>
-<p>#I used the filter() function to look at one brain region at a time (PFC vs.&nbsp;hippocampus) and the group_by() function to analyze the data by experimental group (control vs.&nbsp;EtOH-treated). I then calculated the average expression level of each protein of interest relative to GAPDH (which I calculated for each mouse in the previous step). These values align with what the authors calculated. WB_data %&gt;% filter(Region == “PFC”) %&gt;% group_by(Group) %&gt;% summarise( n = n(), mean_ZO1_GAPDH = mean(ZO1_GAPDH), mean_Occludin_GAPDH = mean(Occludin_GAPDH), mean_Claudin5_GAPDH = mean(Claudin5_GAPDH) )</p>
-<p>WB_data %&gt;% filter(Region == “Hippocampus”) %&gt;% group_by(Group) %&gt;% summarise( n = n(), mean_ZO1_GAPDH = mean(ZO1_GAPDH), mean_Occludin_GAPDH = mean(Occludin_GAPDH), mean_Claudin5_GAPDH = mean(Claudin5_GAPDH) )</p>
-<p>#The authors appeared to have done a 1-way ANOVA on this data, looking at the effect of experimental group on protein expression levels. I got the same p-values as the authors. I found it interesting that the authors did not do a 2-way ANOVA on this data in order to look at the effect of brain region on protein expression levels and a potential experimental group by brain region interaction. model_ZO1_PFC &lt;- aov(ZO1_GAPDH ~ Group, data = WB_data %&gt;% filter(Region == “PFC”)) summary(model_ZO1_PFC) model_Occludin_PFC &lt;- aov(Occludin_GAPDH ~ Group, data = WB_data %&gt;% filter(Region == “PFC”)) summary(model_Occludin_PFC) model_Claudin5_PFC &lt;- aov(Claudin5_GAPDH ~ Group, data = WB_data %&gt;% filter(Region == “PFC”)) summary(model_Claudin5_PFC)</p>
-<p>model_ZO1_Hippocampus &lt;- aov(ZO1_GAPDH ~ Group, data = WB_data %&gt;% filter(Region == “Hippocampus”)) summary(model_ZO1_Hippocampus) model_Occludin_Hippocampus &lt;- aov(Occludin_GAPDH ~ Group, data = WB_data %&gt;% filter(Region == “Hippocampus”)) summary(model_Occludin_Hippocampus) model_Claudin5_Hippocampus &lt;- aov(Claudin5_GAPDH ~ Group, data = WB_data %&gt;% filter(Region == “Hippocampus”)) summary(model_Claudin5_Hippocampus)</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(readxl)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Attaching package: 'dplyr'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following objects are masked from 'package:stats':
+
+    filter, lag</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
+✔ forcats   1.0.1     ✔ readr     2.1.6
+✔ ggplot2   4.0.1     ✔ stringr   1.6.0
+✔ lubridate 1.9.4     ✔ tibble    3.3.1
+✔ purrr     1.2.1     ✔ tidyr     1.3.2</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+✖ dplyr::filter() masks stats::filter()
+✖ dplyr::lag()    masks stats::lag()
+ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggpubr)</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(knitr)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co">#I read in the raw data file. </span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>raw_data <span class="ot">&lt;-</span> <span class="fu">read_excel</span>(<span class="st">"data/Raw Data for Data Replication Project.xlsx"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>New names:
+• `WBC(×10^9/L)` -&gt; `WBC(×10^9/L)...10`
+• `WBC(×10^9/L)` -&gt; `WBC(×10^9/L)...11`</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(raw_data)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 6 × 23
+  Group  No      Age  MMSE  MoCA  PSQI  HAMA  HAMD Alcohol consumption (gram/d…¹
+  &lt;chr&gt;  &lt;chr&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;                         &lt;dbl&gt;
+1 Health C5       38    30    29     3     4     2                            NA
+2 &lt;NA&gt;   C6       46    29    29     1     4     3                            NA
+3 &lt;NA&gt;   C7       41    28    27     4     7     4                            NA
+4 &lt;NA&gt;   C8       42    29    29     1     0     2                            NA
+5 &lt;NA&gt;   C9       42    29    29     1     2     0                            NA
+6 &lt;NA&gt;   C10      37    27    26     5     8     7                            NA
+# ℹ abbreviated name: ¹​`Alcohol consumption (gram/day)`
+# ℹ 14 more variables: `WBC(×10^9/L)...10` &lt;dbl&gt;, `WBC(×10^9/L)...11` &lt;dbl&gt;,
+#   `PLT(×10^9/L)` &lt;dbl&gt;, `HGB(g/L)` &lt;dbl&gt;, `GLU(mmol/L)` &lt;dbl&gt;,
+#   `UA(umol/l)` &lt;dbl&gt;, `CR(umol/L)` &lt;dbl&gt;, `ALT(U/L)` &lt;dbl&gt;, `AST(U/L)` &lt;dbl&gt;,
+#   `GGT(U/L)` &lt;dbl&gt;, `TBIL(umol/L)` &lt;dbl&gt;, `DBIL(umol/L)` &lt;dbl&gt;,
+#   `IBIL(umol/L)` &lt;dbl&gt;, `ALB(umol/L)` &lt;dbl&gt;</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co">#I used the excel_sheets() function to see the names of all of the sheets in the excel file.</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>sheets <span class="ot">&lt;-</span> <span class="fu">excel_sheets</span>(<span class="st">"data/Raw Data for Data Replication Project.xlsx"</span>)</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>sheets</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "Characteristics of the study po" "FITC-Dextran"                   
+ [3] "Immunofluorescence staining"     "western blot"                   
+ [5] "WB Re-organized"                 "MWM CE D1-D5"                   
+ [7] "MWM CE D6"                       "MWM MF D1-D5"                   
+ [9] "MWM MF D6"                       "NOR CE"                         
+[11] "NOR CE Re-organized"             "NOR MF"                         </code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co">#After reorganizing some of the novel object recognition test data in a new excel sheet, I loaded it in using the read_excel() function. The novel object recognition (NOR) test is used to assess recognition memory and relies on the natural tendency of mice to explore a novel object over a familiar one. The time spent exploring a previously explored object (Old column) and time spent exploring a new object (New column) are recorded for each mouse. The mice are divided into two different groups, control and EtOH-treated. The percentage of time spent exploring the novel object, calculated as (time spent exploring novel object/total exploration time)*100, is recorded in the Ratio column. </span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>NOR_data <span class="ot">&lt;-</span> <span class="fu">read_excel</span>(<span class="st">"data/Raw Data for Data Replication Project.xlsx"</span>, <span class="at">sheet =</span> <span class="dv">11</span>)</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>NOR_data</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 20 × 5
+   `Animal ID` Group     Old   New Ratio
+   &lt;chr&gt;       &lt;chr&gt;   &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+ 1 C1          Control  6.94 22.6   76.5
+ 2 C2          Control  5.75 15.6   73.0
+ 3 C3          Control 10.7  19.1   64.2
+ 4 C4          Control  9.31 23.3   71.4
+ 5 C5          Control 12.8  39.0   75.3
+ 6 C6          Control  6.96 19.5   73.7
+ 7 C7          Control 11.1  25.5   69.7
+ 8 C8          Control 12.0  28.8   70.6
+ 9 C9          Control  6.36 23.0   78.4
+10 C10         Control  8.21 16.0   66.1
+11 E1          EtOH     8.5   7.35  46.4
+12 E2          EtOH     7.92 13.1   62.3
+13 E3          EtOH     8.45 13.8   62.0
+14 E4          EtOH    13.0  11.1   46.2
+15 E5          EtOH     5.3   9.47  64.1
+16 E6          EtOH    16.0  17.5   52.2
+17 E7          EtOH     9.35 15.3   62.1
+18 E8          EtOH     7.93 13.1   62.3
+19 E9          EtOH     4.26  5.32  55.5
+20 E10         EtOH    10.8   7.6   41.3</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co">#I used the group_by() function to analyze the data by experimental group (Control vs. EtOH). I calculated the average time spent exploring the new object, average time exploring the old object, standard deviation in exploration time of the new object, standard deviation in exploration time of the old object, and average percentage of time spent exploring the new object for each experimental group. The mean percentage values line up with what was calculated by the authors.</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>NOR_data <span class="sc">%&gt;%</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(Group) <span class="sc">%&gt;%</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">mean_novel =</span> <span class="fu">mean</span>(New, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">mean_familiar =</span> <span class="fu">mean</span>(Old, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">sd_novel =</span> <span class="fu">sd</span>(New, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">sd_familiar =</span> <span class="fu">sd</span>(Old, <span class="at">na.rm =</span> <span class="cn">TRUE</span>), </span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">mean_ratio =</span> <span class="fu">mean</span>(Ratio, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 2 × 6
+  Group   mean_novel mean_familiar sd_novel sd_familiar mean_ratio
+  &lt;chr&gt;        &lt;dbl&gt;         &lt;dbl&gt;    &lt;dbl&gt;       &lt;dbl&gt;      &lt;dbl&gt;
+1 Control       23.2          9.00     6.88        2.52       71.9
+2 EtOH          11.4          9.15     3.87        3.45       55.4</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co">#I made a simple bar graph, which is what the authors of the paper did, to visualize the average percentage of time spent exploring the novel object by experimental group. I used the stat_summary function to graph the average percentage of time spent exploring the novel object, and to add error bars. I also added in the individual data points with geom_jitter(), which is what the authors did as well. </span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>NOR_data <span class="ot">&lt;-</span> NOR_data <span class="sc">%&gt;%</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Ratio =</span> <span class="fu">as.numeric</span>(Ratio))</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(NOR_data, <span class="fu">aes</span>(<span class="at">x =</span> Group, <span class="at">y =</span> Ratio, <span class="at">fill =</span> Group)) <span class="sc">+</span></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">stat_summary</span>(<span class="at">fun =</span> mean, <span class="at">geom =</span> <span class="st">"bar"</span>, <span class="at">width =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_jitter</span>(<span class="at">width =</span> <span class="fl">0.15</span>, <span class="at">size =</span> <span class="fl">2.5</span>, <span class="at">alpha =</span> <span class="fl">0.8</span>) <span class="sc">+</span> </span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">stat_summary</span>(<span class="at">fun.data =</span> mean_se, <span class="at">geom =</span> <span class="st">"errorbar"</span>, <span class="at">width =</span> <span class="fl">0.2</span>) <span class="sc">+</span></span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Average Percentage of Time Spent Exploring the Novel Object"</span>, <span class="at">x =</span> <span class="st">"Experimental       Group"</span>, <span class="at">y =</span> <span class="st">"Average Percentage"</span>) <span class="sc">+</span> </span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Data-Replication_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Here is the figure from the original paper. </span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">include_graphics</span>(<span class="st">"images/NOR Bar Graph.jpeg"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="images/NOR%20Bar%20Graph.jpeg" class="img-fluid figure-img" width="524"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co">#I did a T-test to determine whether or not the mean percentage of time spent exploring the novel object is significantly different between control and EtOH-treated mice. </span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="fu">t.test</span>(Ratio <span class="sc">~</span> Group, <span class="at">data =</span> NOR_data)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Welch Two Sample t-test
+
+data:  Ratio by Group
+t = 5.4737, df = 13.702, p-value = 8.855e-05
+alternative hypothesis: true difference in means between group Control and group EtOH is not equal to 0
+95 percent confidence interval:
+ 10.00167 22.93315
+sample estimates:
+mean in group Control    mean in group EtOH 
+             71.89542              55.42802 </code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Since the p-value is 0.000089, the mean percentage of time spent exploring the novel object is significantly different between control and EtOH-treated mice. The authors calculated the same p-value.</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="co">#After reorganizing some of the western blot data in a new excel sheet, I loaded it in. This particular western blot (WB) was looking at protein expression of three different tight junction proteins, ZO-1, occludin, and claudin-5, in two different brain regions. GAPDH is frequently used as a housekeeping protein to normalize the expression levels of other proteins. </span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>WB_data <span class="ot">&lt;-</span> <span class="fu">read_excel</span>(<span class="st">"data/Raw Data for Data Replication Project.xlsx"</span>, <span class="at">sheet =</span> <span class="dv">5</span>)</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>WB_data</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 24 × 7
+   ID    Region Group   `ZO-1` Occludin `Claudin-5` GAPDH
+   &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;    &lt;dbl&gt;    &lt;dbl&gt;       &lt;dbl&gt; &lt;dbl&gt;
+ 1 C1    PFC    Control   551.    1499.        431.  834.
+ 2 C2    PFC    Control  1064.    1504.        502.  928.
+ 3 C3    PFC    Control  1204.    1863.        713.  918.
+ 4 C4    PFC    Control  1068.    1317.        629.  838.
+ 5 C5    PFC    Control  1301.    1544.        935.  831.
+ 6 C6    PFC    Control   834.    1573.       1003.  938.
+ 7 E1    PFC    EtOH      705.    1148.        652.  708.
+ 8 E2    PFC    EtOH      710.     877.        632.  670.
+ 9 E3    PFC    EtOH      340.     930.        605. 1040.
+10 E4    PFC    EtOH      292.     872.        502.  757.
+# ℹ 14 more rows</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="co">#I used the mutate function and added three additional columns to the re-organized dataset. </span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>WB_data <span class="ot">&lt;-</span> WB_data <span class="sc">%&gt;%</span></span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a> <span class="fu">mutate</span>(</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">ZO1_GAPDH =</span> <span class="st">`</span><span class="at">ZO-1</span><span class="st">`</span><span class="sc">/</span>GAPDH,</span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">Occludin_GAPDH =</span> Occludin<span class="sc">/</span>GAPDH,</span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">Claudin5_GAPDH =</span> <span class="st">`</span><span class="at">Claudin-5</span><span class="st">`</span><span class="sc">/</span>GAPDH</span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a> )</span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>WB_data</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 24 × 10
+   ID    Region Group `ZO-1` Occludin `Claudin-5` GAPDH ZO1_GAPDH Occludin_GAPDH
+   &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;dbl&gt;    &lt;dbl&gt;       &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt;          &lt;dbl&gt;
+ 1 C1    PFC    Cont…   551.    1499.        431.  834.     0.660          1.80 
+ 2 C2    PFC    Cont…  1064.    1504.        502.  928.     1.15           1.62 
+ 3 C3    PFC    Cont…  1204.    1863.        713.  918.     1.31           2.03 
+ 4 C4    PFC    Cont…  1068.    1317.        629.  838.     1.27           1.57 
+ 5 C5    PFC    Cont…  1301.    1544.        935.  831.     1.57           1.86 
+ 6 C6    PFC    Cont…   834.    1573.       1003.  938.     0.889          1.68 
+ 7 E1    PFC    EtOH    705.    1148.        652.  708.     0.995          1.62 
+ 8 E2    PFC    EtOH    710.     877.        632.  670.     1.06           1.31 
+ 9 E3    PFC    EtOH    340.     930.        605. 1040.     0.327          0.894
+10 E4    PFC    EtOH    292.     872.        502.  757.     0.386          1.15 
+# ℹ 14 more rows
+# ℹ 1 more variable: Claudin5_GAPDH &lt;dbl&gt;</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="co">#I used the filter() function to look at one brain region at a time (PFC vs. hippocampus) and the group_by() function to analyze the data by experimental group (control vs. EtOH-treated). I then calculated the average expression level of each protein of interest relative to GAPDH (which I calculated for each mouse in the previous step). These values align with what the authors calculated.</span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>WB_data <span class="sc">%&gt;%</span></span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Region <span class="sc">==</span> <span class="st">"PFC"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(Group) <span class="sc">%&gt;%</span></span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">n =</span> <span class="fu">n</span>(),</span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">mean_ZO1_GAPDH =</span> <span class="fu">mean</span>(ZO1_GAPDH),</span>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">mean_Occludin_GAPDH =</span> <span class="fu">mean</span>(Occludin_GAPDH),</span>
+<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">mean_Claudin5_GAPDH =</span> <span class="fu">mean</span>(Claudin5_GAPDH)</span>
+<span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 2 × 5
+  Group       n mean_ZO1_GAPDH mean_Occludin_GAPDH mean_Claudin5_GAPDH
+  &lt;chr&gt;   &lt;int&gt;          &lt;dbl&gt;               &lt;dbl&gt;               &lt;dbl&gt;
+1 Control     6          1.14                 1.76               0.796
+2 EtOH        6          0.555                1.15               0.618</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>WB_data <span class="sc">%&gt;%</span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Region <span class="sc">==</span> <span class="st">"Hippocampus"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(Group) <span class="sc">%&gt;%</span></span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">n =</span> <span class="fu">n</span>(),</span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">mean_ZO1_GAPDH =</span> <span class="fu">mean</span>(ZO1_GAPDH),</span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">mean_Occludin_GAPDH =</span> <span class="fu">mean</span>(Occludin_GAPDH),</span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">mean_Claudin5_GAPDH =</span> <span class="fu">mean</span>(Claudin5_GAPDH)</span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 2 × 5
+  Group       n mean_ZO1_GAPDH mean_Occludin_GAPDH mean_Claudin5_GAPDH
+  &lt;chr&gt;   &lt;int&gt;          &lt;dbl&gt;               &lt;dbl&gt;               &lt;dbl&gt;
+1 Control     6          1.01                0.218               0.478
+2 EtOH        6          0.571               0.142               0.184</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="co">#The authors appeared to have done a 1-way ANOVA on this data, looking at the effect of experimental group on protein expression levels. I got the same p-values as the authors. I found it interesting that the authors did not do a 2-way ANOVA on this data in order to look at the effect of brain region on protein expression levels and a potential experimental group by brain region interaction. </span></span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>model_ZO1_PFC <span class="ot">&lt;-</span> <span class="fu">aov</span>(ZO1_GAPDH <span class="sc">~</span> Group, <span class="at">data =</span> WB_data <span class="sc">%&gt;%</span> </span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Region <span class="sc">==</span> <span class="st">"PFC"</span>))</span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summary</span>(model_ZO1_PFC)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>            Df Sum Sq Mean Sq F value Pr(&gt;F)  
+Group        1  1.030  1.0301   8.572 0.0151 *
+Residuals   10  1.202  0.1202                 
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>model_Occludin_PFC <span class="ot">&lt;-</span> <span class="fu">aov</span>(Occludin_GAPDH <span class="sc">~</span> Group, <span class="at">data =</span> WB_data <span class="sc">%&gt;%</span> </span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Region <span class="sc">==</span> <span class="st">"PFC"</span>))</span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summary</span>(model_Occludin_PFC)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>            Df Sum Sq Mean Sq F value  Pr(&gt;F)   
+Group        1  1.118  1.1182   20.37 0.00112 **
+Residuals   10  0.549  0.0549                   
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>model_Claudin5_PFC <span class="ot">&lt;-</span> <span class="fu">aov</span>(Claudin5_GAPDH <span class="sc">~</span> Group, <span class="at">data =</span> WB_data <span class="sc">%&gt;%</span> </span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Region <span class="sc">==</span> <span class="st">"PFC"</span>))</span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summary</span>(model_Claudin5_PFC)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>            Df Sum Sq Mean Sq F value Pr(&gt;F)
+Group        1 0.0957 0.09571   1.183  0.302
+Residuals   10 0.8094 0.08094               </code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>model_ZO1_Hippocampus <span class="ot">&lt;-</span> <span class="fu">aov</span>(ZO1_GAPDH <span class="sc">~</span> Group, <span class="at">data =</span> WB_data <span class="sc">%&gt;%</span> </span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Region <span class="sc">==</span> <span class="st">"Hippocampus"</span>))</span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summary</span>(model_ZO1_Hippocampus)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>            Df Sum Sq Mean Sq F value Pr(&gt;F)  
+Group        1 0.5784  0.5784   6.825 0.0259 *
+Residuals   10 0.8474  0.0847                 
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>model_Occludin_Hippocampus <span class="ot">&lt;-</span> <span class="fu">aov</span>(Occludin_GAPDH <span class="sc">~</span> Group, <span class="at">data =</span> WB_data <span class="sc">%&gt;%</span> </span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Region <span class="sc">==</span> <span class="st">"Hippocampus"</span>))</span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summary</span>(model_Occludin_Hippocampus)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>            Df  Sum Sq Mean Sq F value Pr(&gt;F)
+Group        1 0.01733 0.01733   1.301  0.281
+Residuals   10 0.13321 0.01332               </code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>model_Claudin5_Hippocampus <span class="ot">&lt;-</span> <span class="fu">aov</span>(Claudin5_GAPDH <span class="sc">~</span> Group, <span class="at">data =</span> WB_data <span class="sc">%&gt;%</span> </span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Region <span class="sc">==</span> <span class="st">"Hippocampus"</span>))</span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summary</span>(model_Claudin5_Hippocampus)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>            Df Sum Sq Mean Sq F value  Pr(&gt;F)   
+Group        1 0.2592 0.25917    17.6 0.00184 **
+Residuals   10 0.1472 0.01472                   
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
+</div>
+</div>
 
 </main>
 <!-- /main column -->
