@@ -8,6 +8,7 @@ library(dplyr)
 library(tidyverse)
 library(ggplot2)
 library(ggpubr)
+library(knitr)
 
 #I read in the raw data file. 
 raw_data <- read_excel("/Users/nikhilakalapatapu/Data Replication Project/data/Raw Data for Data Replication Project.xlsx")
@@ -42,6 +43,10 @@ ggplot(NOR_data, aes(x = Group, y = Ratio, fill = Group)) +
   stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.2) +
   labs(title = "Average Percentage of Time Spent Exploring the Novel Object", x = "Experimental       Group", y = "Average Percentage") + 
   theme_minimal()
+
+#Here is the figure from the original paper. 
+list.files("images")
+knitr::include_graphics("NOR Bar graph.jpeg")
 
 #I did a T-test to determine whether or not the mean percentage of time spent exploring the novel object is significantly different between control and EtOH-treated mice. 
 t.test(Ratio ~ Group, data = NOR_data)
