@@ -12,7 +12,8 @@ library(knitr)
 ```
 
 ```{r}
-#I read in the raw data file. 
+#This paper is uses biochemical and behavioral assays to look at the effects of EtOH-consumption on the gut-brain axis in mice. 
+#First, I read in the raw data file. 
 raw_data <- read_excel("data/Raw Data for Data Replication Project.xlsx")
 head(raw_data)
 ```
