@@ -1,7 +1,8 @@
 ---
-title: "Data Replication"
+title: "Data Replication Assignment"
 format: html
 ---
+
 ```{r}
 library(readxl)
 library(dplyr)
@@ -11,11 +12,10 @@ library(ggpubr)
 library(knitr)
 ```
 
----
-title: "Introduction"
----
-This paper is uses biochemical and behavioral assays to look at the effects of EtOH-consumption on the gut-brain axis in mice. 
+# Study Summary
+This paper investigates how long-term heavy drinking may damage the blood–brain barrier (BBB) via changes in gut bacteria and metabolites. Researchers compared 30 healthy adults vs. 30 patients with alcohol use disorder (AUD). They analyzed stool samples (microbiome sequencing and metabolite profiling) and also performed mouse experiments. In mice, chronic alcohol feeding caused memory decline, more leakiness of a fluorescent tracer (FITC-dextran) into the brain, and lower levels of tight-junction proteins (ZO-1, occludin, claudin-5) that normally "seal" the BBB. Transplanting stool from AUD patients into germ-free mice reproduced the BBB damage. Importantly, giving an anti-inflammatory gut bacterium (Faecalibacterium prausnitzii) to alcohol-fed mice improved their cognition and restored BBB integrity. In short, the study suggests that alcohol harms the brain’s protective barrier through the gut–brain axis, and that modifying gut microbes (e.g. F. prausnitzii treatment) might counteract this effect. 
 
+# Data Replication
 I first read in the raw data file and look a look at it using the head() function.
 ```{r}
 raw_data <- read_excel("data/Raw Data for Data Replication Project.xlsx")
